@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const SPOTIFY_CLIENT_ID = "9506d08e52344e2793bc91591d236428";
-const SPOTIFY_CLIENT_SECRET = "7252a8678e794856a51e896d6c9ae90e";
+const SPOTIFY_CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
+const SPOTIFY_CLIENT_SECRET = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
 let accessToken = "";
 
 // Obtém um token de acesso do Spotify
