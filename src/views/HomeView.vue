@@ -1,3 +1,4 @@
+
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useEmotionStore } from "../stores/emotionStore";
@@ -7,9 +8,8 @@ const videoRef = ref<HTMLVideoElement | null>(null);
 const store = useEmotionStore();
 const isCameraOn = ref(false);
 const modelsLoaded = ref(false);
-let detectionInterval: number | null = null; // Armazena o intervalo da detecção
+let detectionInterval: number | null = null;
 
-// 🔹 Função para iniciar a câmera
 const startCamera = async () => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -24,11 +24,9 @@ const startCamera = async () => {
   }
 };
 
-// 🔹 Função para iniciar a detecção de emoções
 const startDetection = () => {
   if (!modelsLoaded.value || !isCameraOn.value || !videoRef.value) return;
 
-  // Interrompe qualquer detecção anterior antes de iniciar uma nova
   if (detectionInterval) {
     clearInterval(detectionInterval);
   }
@@ -38,59 +36,76 @@ const startDetection = () => {
       const emotion = await detectEmotion(videoRef.value);
       store.setEmotion(emotion);
     }
-  }, 3000); // Detectar emoções a cada 3 segundos
+  }, 3000);
 };
 
-// 🔹 Ao montar o componente, carregamos os modelos
 onMounted(async () => {
-  await loadModels(); // Carregar modelos primeiro
-  modelsLoaded.value = true; // Marcar que os modelos foram carregados
+  await loadModels();
+  modelsLoaded.value = true;
 });
 
-// 🔹 Iniciar câmera e detecção ao clicar no botão
 const start = async () => {
-  await startCamera(); // Primeiro inicia a câmera
-  startDetection(); // Depois inicia a detecção
+  await startCamera();
+  startDetection();
 };
 </script>
 
 <template>
   <div class="container">
     <h1>🎭 AI Mood Playlist</h1>
-    <p>Detecte seu humor e receba recomendações musicais</p>
+    <p class="intro">Detecte seu humor e receba recomendações musicais</p>
 
-    <button @click="start" v-if="!isCameraOn">Iniciar Câmera</button>
+    <button @click="start">Iniciar Câmera</button>
 
-    <div v-if="true" class="camera-container">
+    <div class="camera-container">
       <video ref="videoRef" autoplay playsinline></video>
-      <p v-if="store.emotion">Emoção detectada: <strong>{{ store.emotion || "Nenhuma detectada" }}</strong></p>
+      <p v-if="store.emotion" class="emotion-text">Emoção detectada: <strong>{{ store.emotion || "Nenhuma detectada" }}</strong></p>
     </div>
 
     <div v-if="store.recommendedMusic" class="music-recommendation">
       <h2>🎶 Música Recomendada:</h2>
-      <p>
+      <p class="music-info">
         <strong>{{ store.recommendedMusic.name }}</strong>
-        <img :src="store.recommendedMusic.image" alt="">
+        <img class="music-image" :src="store.recommendedMusic.image" alt="Imagem da Playlist">
       </p>
-      <a :href="store.recommendedMusic.url" target="_blank">Ouvir no Spotify 🎧</a>
+      <a class="spotify-link" :href="store.recommendedMusic.url" target="_blank">Ouvir no Spotify 🎧</a>
     </div>
   </div>
 </template>
 
 <style scoped>
+/* Centralização do layout */
 .container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
   text-align: center;
   padding: 20px;
+  background: #f4f4f4;
+  font-family: Arial, sans-serif;
+}
+
+.intro {
+  font-size: 1.2em;
+  margin-bottom: 20px;
+  color: #555;
 }
 
 button {
-  padding: 10px 20px;
+  padding: 12px 25px;
   font-size: 16px;
   cursor: pointer;
-  background: #4caf50;
+  background-color: #4caf50;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #45a049;
 }
 
 .camera-container {
@@ -100,23 +115,58 @@ button {
 video {
   width: 100%;
   max-width: 400px;
-  border-radius: 10px;
-  display: block;
+  border-radius: 12px;
+  border: 2px solid #ddd;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background-color: black;
+}
+
+.emotion-text {
+  margin-top: 10px;
+  font-weight: bold;
+  color: #333;
 }
 
 .music-recommendation {
-  margin-top: 20px;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  background: white;
+  margin-top: 30px;
+  padding: 20px;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  background-color: #fff;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.music-recommendation a {
-  display: block;
+.music-recommendation h2 {
+  margin-bottom: 15px;
+  font-size: 1.5em;
+  color: #333;
+}
+
+.music-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.music-image {
   margin-top: 10px;
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 10px;
+}
+
+.spotify-link {
+  margin-top: 15px;
   text-decoration: none;
   color: #1db954;
   font-weight: bold;
+  font-size: 1.1em;
+  transition: color 0.3s ease;
+}
+
+.spotify-link:hover {
+  color: #1ed760;
 }
 </style>

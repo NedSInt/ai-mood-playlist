@@ -1,9 +1,7 @@
 import * as faceapi from "face-api.js";
 
-// Caminho onde os modelos estão armazenados
 const MODEL_URL = "http://localhost:5173/models";
 
-// Função para carregar os modelos necessários
 export async function loadModels() {
   console.log("Carregando modelos...");
   try {

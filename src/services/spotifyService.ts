@@ -4,9 +4,8 @@ const SPOTIFY_CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
 let accessToken = "";
 
-// Obtém um token de acesso do Spotify
 const getAccessToken = async () => {
-  if (accessToken) return accessToken; // Usa o token em cache se disponível
+  if (accessToken) return accessToken;
 
   const response = await axios.post(
     "https://accounts.spotify.com/api/token",
@@ -23,7 +22,6 @@ const getAccessToken = async () => {
   return accessToken;
 };
 
-// Mapeamento de emoções para gêneros musicais e palavras-chave
 const emotionToQuery = {
   happy: "happy hits",
   sad: "sad songs",
@@ -32,7 +30,6 @@ const emotionToQuery = {
   neutral: "chill vibes",
 };
 
-// Função para buscar playlists baseadas na emoção
 export const getMusicRecommendation = async (emotion: string) => {
   const query = emotionToQuery[emotion as keyof typeof emotionToQuery] || "chill vibes";
   
@@ -42,13 +39,14 @@ export const getMusicRecommendation = async (emotion: string) => {
     const response = await axios.get("https://api.spotify.com/v1/search", {
       headers: { Authorization: `Bearer ${token}` },
       params: {
-        q: query,       // Busca por playlists baseadas na emoção
+        q: query,
         type: "playlist",
-        limit: 5,       // Retorna até 5 playlists para variedade
+        limit: 5,
       },
     });
 
     console.log('PLAYLISTS', response.data.playlists.items);
+    
     const playlists = response.data.playlists.items
       .filter(Boolean)
       .map((playlist: any) => ({
@@ -56,11 +54,18 @@ export const getMusicRecommendation = async (emotion: string) => {
         url: playlist.external_urls.spotify,
         image: playlist.images[0]?.url,
       }));
+
     console.log('PLAYLISTS', playlists);
     
-    return playlists[0];
+    if (playlists.length === 0) {
+      return null;
+    }
+
+    // Retorna uma playlist aleatória
+    return playlists[Math.floor(Math.random() * playlists.length)];
+
   } catch (error) {
     console.error("Erro ao buscar playlists:", error);
-    return [];
+    return null; // Retorna null em caso de erro
   }
 };
